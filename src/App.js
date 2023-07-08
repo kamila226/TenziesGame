@@ -1,9 +1,9 @@
 import React from "react";
-import Die from "./Die";
-import Timer from "./Timer";
-import Time from "./Time";
-import { nanoid } from "nanoid";
 import { useState, useEffect } from "react";
+import Die from "./Components/Die";
+import Timer from "./Components/Timer";
+import Time from "./Components/Time";
+import { nanoid } from "nanoid";
 import Confetti from "react-confetti";
 
 function App() {
