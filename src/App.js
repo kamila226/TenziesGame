@@ -14,6 +14,8 @@ function App() {
   const [bestRolls, setBestRolls] = useState(localStorage.getItem("rolls"));
   const [bestTime, setBestTime] = useState(localStorage.getItem("time"));
 
+  // =========== SAVING BEST RESULT =========== //
+
   useEffect(() => {
     if (tenzies) {
       setBestRolls(prevBestRolls => (
@@ -27,7 +29,6 @@ function App() {
     localStorage.setItem("time", bestTime);
   }, [bestRolls, bestTime])
 
-  
   const handleBestTime = (time) => {
     if (tenzies) {
         setBestTime(prevBestTime => (
@@ -35,6 +36,8 @@ function App() {
         ))
     }
   }
+
+  // =========== CHECK WINNING =========== //
 
   useEffect(() => {
     const allHeld = dice.every((die) => die.isHeld);
@@ -45,9 +48,25 @@ function App() {
     }
   }, [dice]);
 
+  // =========== GAME PROCESS =========== //
+
+  function startGame() {
+    setRolls(0);
+    setGameStarted(true);
+    setTenzies(false);
+    setDice(allNewDice());
+  }
+
+  function endGame() {
+    setTenzies(true);
+    setGameStarted(false);
+  }  
+
+  // =========== OPERATIONS WITH DICE =========== //
+
   function generateNewDie() {
     return {
-      value: Math.ceil(Math.random() * 1),
+      value: Math.ceil(Math.random() * 6),
       isHeld: false,
       id: nanoid(),
     };
@@ -67,25 +86,8 @@ function App() {
         return die.isHeld ? die : generateNewDie();
       })
     );
-    increaseRolls();
-    setGameStarted(true);
-  }
-
-  function increaseRolls() {
     setRolls((prevRolls) => prevRolls + 1);
-  }
-
-  function startGame() {
-    setRolls(0);
     setGameStarted(true);
-    setTenzies(false);
-    setDice(allNewDice());
-  }
-
-  function endGame() {
-    setTenzies(true);
-    setGameStarted(false);
-    
   }
 
   function holdDice(id) {
@@ -96,6 +98,8 @@ function App() {
     );
   }
 
+  // =========== CREATING ELEMENTS =========== //
+
   const diceElements = dice.map((die) => (
     <Die
       key={die.id}
@@ -104,6 +108,8 @@ function App() {
       holdDice={() => holdDice(die.id)}
     />
   ));
+
+// =========== RETURNING COMPONENT =========== //
 
   return (
     <main>
