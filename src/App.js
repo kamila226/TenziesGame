@@ -1,5 +1,7 @@
 import React from "react";
 import Die from "./Die";
+import Timer from "./Timer";
+import Time from "./Time";
 import { nanoid } from "nanoid";
 import { useState, useEffect } from "react";
 import Confetti from "react-confetti";
@@ -8,19 +10,44 @@ function App() {
   const [dice, setDice] = useState(allNewDice());
   const [tenzies, setTenzies] = useState(false);
   const [rolls, setRolls] = useState(0);
+  const [gameStarted, setGameStarted] = useState(true);
+  const [bestRolls, setBestRolls] = useState(localStorage.getItem("rolls"));
+  const [bestTime, setBestTime] = useState(localStorage.getItem("time"));
+
+  useEffect(() => {
+    if (tenzies) {
+      setBestRolls(prevBestRolls => (
+         !prevBestRolls || rolls < prevBestRolls ? rolls : prevBestRolls
+      ))
+    }
+  }, [tenzies])
+
+  useEffect(() => {
+    localStorage.setItem("rolls", bestRolls);
+    localStorage.setItem("time", bestTime);
+  }, [bestRolls, bestTime])
+
+  
+  const handleBestTime = (time) => {
+    if (tenzies) {
+        setBestTime(prevBestTime => (
+        !prevBestTime || time < prevBestTime ? time : prevBestTime
+        ))
+    }
+  }
 
   useEffect(() => {
     const allHeld = dice.every((die) => die.isHeld);
     const firstValue = dice[0].value;
     const allSameValue = dice.every((die) => die.value === firstValue);
     if (allHeld && allSameValue) {
-      setTenzies(true);
+        endGame()
     }
   }, [dice]);
 
   function generateNewDie() {
     return {
-      value: Math.ceil(Math.random() * 6),
+      value: Math.ceil(Math.random() * 1),
       isHeld: false,
       id: nanoid(),
     };
@@ -41,15 +68,24 @@ function App() {
       })
     );
     increaseRolls();
+    setGameStarted(true);
   }
 
   function increaseRolls() {
     setRolls((prevRolls) => prevRolls + 1);
   }
 
-  function restartGame() {
+  function startGame() {
+    setRolls(0);
+    setGameStarted(true);
     setTenzies(false);
     setDice(allNewDice());
+  }
+
+  function endGame() {
+    setTenzies(true);
+    setGameStarted(false);
+    
   }
 
   function holdDice(id) {
@@ -79,10 +115,21 @@ function App() {
       </p>
       <div className="dice-container">{diceElements}</div>
       <div className="result">
-        <h3>Rolls:{rolls}</h3>
-        <h3>Time:</h3>
+        <h3>Rolls: {rolls}</h3>
+        <h3>Time:&nbsp;
+          <Timer 
+            gameStarted={gameStarted}
+            handleBestTime={handleBestTime}
+          />
+        </h3>
+        <h4 className="grey-text">Best rolls: {bestRolls}</h4>
+        <h4 className="grey-text">Best time:&nbsp;
+          <Time 
+            time={bestTime}
+          />
+        </h4>
       </div>
-      <button className="roll-dice" onClick={tenzies ? restartGame : rollDice}>
+      <button className="roll-dice" onClick={tenzies ? startGame : rollDice}>
         {tenzies ? "New Game" : "Roll"}
       </button>
     </main>
